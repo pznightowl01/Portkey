@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Settings - Portkey{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">⚙️ Settings</h1>
+
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <h2 class="text-xl font-bold mb-4">📋 Account Info</h2>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold mb-1">Username</label>
+                <input type="text" value="{{ user.username if user else 'Guest' }}" disabled class="w-full px-4 py-2 border-2 rounded-lg bg-gray-100">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold mb-1">Email</label>
+                <input type="email" value="{{ user.email if user else 'guest@portkey.com' }}" disabled class="w-full px-4 py-2 border-2 rounded-lg bg-gray-100">
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <input type="hidden" name="action" value="change_password">
+        <h2 class="text-xl font-bold mb-4">🔒 Change Password</h2>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold mb-1">Current Password</label>
+                <input type="password" name="current_password" required class="w-full px-4 py-2 border-2 rounded-lg focus:border-orange-500">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold mb-1">New Password</label>
+                <input type="password" name="new_password" required class="w-full px-4 py-2 border-2 rounded-lg focus:border-orange-500">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold mb-1">Confirm New Password</label>
+                <input type="password" name="confirm_password" required class="w-full px-4 py-2 border-2 rounded-lg focus:border-orange-500">
+            </div>
+            <button type="submit" class="bg-orange-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-orange-700">Update Password</button>
+        </div>
+    </form>
+
+    <form method="POST" class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <input type="hidden" name="action" value="update_location">
+        <h2 class="text-xl font-bold mb-4">📍 Location Preferences</h2>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold mb-1">Preferred Location</label>
+                <select name="preferred_location" class="w-full px-4 py-2 border-2 rounded-lg focus:border-orange-500">
+                    <option value="">Select location</option>
+                    <option value="Manipal" {% if user and user.preferred_location == 'Manipal' %}selected{% endif %}>Manipal</option>
+                    <option value="Mangalore" {% if user and user.preferred_location == 'Mangalore' %}selected{% endif %}>Mangalore</option>
+                </select>
+                <p class="text-sm text-gray-600 mt-1">This helps us show restaurants closer to you first</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Latitude (Optional)</label>
+                    <input type="number" step="any" name="latitude" value="{{ user.latitude if user and user.latitude else '' }}" placeholder="e.g., 13.0827" class="w-full px-4 py-2 border-2 rounded-lg focus:border-orange-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Longitude (Optional)</label>
+                    <input type="number" step="any" name="longitude" value="{{ user.longitude if user and user.longitude else '' }}" placeholder="e.g., 74.7921" class="w-full px-4 py-2 border-2 rounded-lg focus:border-orange-500">
+                </div>
+            </div>
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700">Update Location</button>
+        </div>
+    </form>
+
+    <form method="POST" class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <input type="hidden" name="action" value="update_preferences">
+        <h2 class="text-xl font-bold mb-4">🎨 Preferences</h2>
+        <div class="space-y-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="font-semibold">Theme</p>
+                    <p class="text-sm text-gray-600">Choose your preferred theme</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="button" onclick="setTheme('light')" class="px-4 py-2 bg-orange-600 text-white rounded-lg">☀️ Light</button>
+                    <button type="button" onclick="setTheme('dark')" class="px-4 py-2 border-2 rounded-lg">🌙 Dark</button>
+                </div>
+            </div>
+            <div class="flex justify-between items-center pt-4 border-t">
+                <div>
+                    <p class="font-semibold">Email Notifications</p>
+                    <p class="text-sm text-gray-600">Receive order updates and promotions</p>
+                </div>
+                <input type="checkbox" name="email_notifications" checked class="w-12 h-6">
+            </div>
+            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700">Save Preferences</button>
+        </div>
+    </form>
+
+    <div class="bg-red-50 border-2 border-red-200 rounded-xl p-6">
+        <h2 class="text-xl font-bold text-red-700 mb-4">⚠️ Danger Zone</h2>
+        <form method="POST" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.')">
+            <input type="hidden" name="action" value="delete_account">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Confirm Username</label>
+                    <input type="text" name="confirm_username" required placeholder="Type your username to confirm" class="w-full px-4 py-2 border-2 rounded-lg border-red-300 focus:border-red-500">
+                </div>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="font-semibold">Delete Account</p>
+                        <p class="text-sm text-gray-600">Permanently delete your account and all associated data</p>
+                    </div>
+                    <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700">Delete Account</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function setTheme(theme) {
+    // Simple theme switching (can be enhanced with actual theme implementation)
+    if (theme === 'dark') {
+        alert('Dark theme coming soon! 🌙');
+    } else {
+        alert('Light theme is active! ☀️');
+    }
+}
+</script>
+{% endblock %}

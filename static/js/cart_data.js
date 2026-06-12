@@ -1,0 +1,1 @@
+window.cartData = {"subtotal": "500.00", "tax": "50.00", "total": "550.00"};

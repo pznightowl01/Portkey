@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }} - Portkey{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="bg-white rounded-xl shadow-lg p-8">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Order #{{ order.id }}</h1>
+                <p class="text-gray-600">{{ order.created_at.strftime('%B %d, %Y at %I:%M %p') if order.created_at else 'N/A' }}</p>
+            </div>
+            <span class="px-4 py-2 rounded-full text-sm font-semibold
+                {% if order.status == 'delivered' %}bg-green-100 text-green-700
+                {% elif order.status == 'out_for_delivery' %}bg-blue-100 text-blue-700
+                {% elif order.status == 'preparing' %}bg-yellow-100 text-yellow-700
+                {% elif order.status == 'ready' %}bg-purple-100 text-purple-700
+                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                {{ order.status.title() }}
+            </span>
+        </div>
+
+        <!-- Order Items -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Order Items</h2>
+            <div class="space-y-4">
+                {% for item in order.order_items %}
+                <div class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <span class="text-2xl">🍽️</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">{{ item.menu_item.name if item.menu_item else 'Unknown Item' }}</h3>
+                            <p class="text-gray-600">{{ item.menu_item.restaurant.name if item.menu_item and item.menu_item.restaurant else 'Unknown Restaurant' }}</p>
+                            {% if item.menu_item %}
+                            <p class="text-sm text-gray-500">{{ item.menu_item.description }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-600">Quantity: {{ item.quantity }}</p>
+                        <p class="text-sm text-gray-600">₹ {{ "%.2f"|format(item.unit_price) }} each</p>
+                        <p class="font-bold text-lg">₹ {{ "%.2f"|format(item.subtotal) }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="bg-gray-50 rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Order Summary</h2>
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>₹ {{ "%.2f"|format(order.total_amount) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Delivery Fee</span>
+                    <span>₹ 0.00</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Tax</span>
+                    <span>₹ 0.00</span>
+                </div>
+                <hr class="my-2">
+                <div class="flex justify-between font-bold text-lg">
+                    <span>Total</span>
+                    <span>₹ {{ "%.2f"|format(order.total_amount) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Info -->
+        {% if order.payment_id %}
+        <div class="bg-green-50 border-2 border-green-200 rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-bold text-green-800 mb-4">💳 Payment Information</h2>
+            <p class="text-green-700">Payment ID: {{ order.payment_id }}</p>
+            <p class="text-green-700">Status: Paid ✅</p>
+        </div>
+        {% endif %}
+
+        <!-- Feedback Section -->
+        {% if order.status == 'delivered' %}
+        <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-bold text-blue-800 mb-4">📝 Feedback</h2>
+            {% if order.feedback %}
+            <div class="mb-4">
+                <div class="flex items-center mb-2">
+                    <span class="text-yellow-500 text-lg mr-2">
+                        {% for i in range(5) %}
+                        {% if i < order.feedback.rating %}⭐{% else %}☆{% endif %}
+                        {% endfor %}
+                    </span>
+                    <span class="text-gray-600">{{ order.feedback.created_at.strftime('%B %d, %Y') if order.feedback.created_at else 'N/A' }}</span>
+                </div>
+                {% if order.feedback.comment %}
+                <p class="text-gray-700">{{ order.feedback.comment }}</p>
+                {% endif %}
+            </div>
+            {% else %}
+            <p class="text-blue-700 mb-4">Help us improve! Share your feedback about this order.</p>
+            <a href="/feedback/{{ order.id }}" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700">Leave Feedback</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-4">
+            <a href="/profile" class="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700">← Back to Profile</a>
+            {% if order.status == 'delivered' %}
+            <a href="/" class="bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-700">Order Again</a>
+            {% endif %}
+            <a href="/chatbot-page" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700">💬 Need Help?</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

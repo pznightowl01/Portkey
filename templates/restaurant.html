@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}{{ restaurant.name }} - Menu{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Restaurant Header -->
+    <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">{{ restaurant.name }}</h1>
+                <p class="text-orange-600 text-xl font-semibold mb-4">{{ restaurant.cuisine_type }} Cuisine</p>
+                <div class="text-gray-600 space-y-1">
+                    <p>📍 {{ restaurant.address }}</p>
+                    <p>📞 {{ restaurant.contact }}</p>
+                    <p>🕒 {{ restaurant.operating_hours }}</p>
+                </div>
+            </div>
+            <div class="text-7xl">
+                {% if restaurant.cuisine_type == 'Italian' %}🍝
+                {% elif restaurant.cuisine_type == 'Chinese' %}🥡
+                {% elif restaurant.cuisine_type == 'Indian' %}🍛
+                {% elif restaurant.cuisine_type == 'Mexican' %}🌮
+                {% elif restaurant.cuisine_type == 'American' %}🍔
+                {% else %}🍴
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Items -->
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">🍽️ Menu</h2>
+
+    {% if menu_items %}
+        {% set categories = menu_items | map(attribute='category') | unique | list %}
+        
+        {% for category in categories %}
+        <div class="mb-12">
+            <h3 class="text-2xl font-bold text-gray-700 mb-6 border-b-2 border-orange-500 pb-2">{{ category }}</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for item in menu_items if item.category == category %}
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <h4 class="text-xl font-bold text-gray-800 mb-2">{{ item.name }}</h4>
+                            <p class="text-gray-600 text-sm mb-3">{{ item.description }}</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-2xl font-bold text-orange-600">₹{{ "%.2f"|format(item.price_inr) }}</span>
+                                {% if item.is_in_stock %}
+                                <span class="text-green-600 text-sm font-semibold">✓ In Stock ({{ item.stock_quantity }})</span>
+                                {% else %}
+                                <span class="text-red-600 text-sm font-semibold">✗ Out of Stock</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if item.is_in_stock %}
+                    <form action="/cart/add" method="POST" class="flex items-center space-x-3">
+                        <input type="hidden" name="menu_item_id" value="{{ item.id }}">
+                        <input 
+                            type="number" 
+                            name="quantity" 
+                            value="1" 
+                            min="1" 
+                            max="{{ item.stock_quantity }}"
+                            class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        >
+                        <button 
+                            type="submit" 
+                            class="flex-1 bg-orange-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-700 transition"
+                        >
+                            Add to Cart
+                        </button>
+                    </form>
+                    {% else %}
+                    <button 
+                        disabled 
+                        class="w-full bg-gray-300 text-gray-500 py-2 px-4 rounded-lg font-semibold cursor-not-allowed"
+                    >
+                        Out of Stock
+                    </button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-lg">
+        <p class="text-yellow-700 font-medium">No menu items available at the moment.</p>
+    </div>
+    {% endif %}
+
+    <!-- Back Button -->
+    <div class="mt-8">
+        <a href="/" class="inline-block bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition">
+            ← Back to Restaurants
+        </a>
+    </div>
+</div>
+{% endblock %}

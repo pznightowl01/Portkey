@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}Track Order #{{ order.id }} - Portkey{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">📦 Order #{{ order.id }}</h1>
+            <span class="px-4 py-2 rounded-full text-sm font-semibold
+                {% if order.status == 'delivered' %}bg-green-100 text-green-700
+                {% elif order.status == 'out_for_delivery' %}bg-blue-100 text-blue-700
+                {% elif order.status == 'preparing' %}bg-yellow-100 text-yellow-700
+                {% elif order.status == 'ready' %}bg-purple-100 text-purple-700
+                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                {{ order.status.title() }}
+            </span>
+        </div>
+
+        <!-- Order Details -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Order Items -->
+            <div>
+                <h2 class="text-xl font-bold mb-4">🍽️ Order Items</h2>
+                <div class="space-y-3">
+                    {% for item in order.order_items %}
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <p class="font-semibold">{{ item.menu_item.name if item.menu_item else 'Unknown Item' }}</p>
+                            <p class="text-sm text-gray-600">Quantity: {{ item.quantity }}</p>
+                        </div>
+                        <p class="font-bold">₹ {{ "%.2f"|format(item.subtotal) }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-4 pt-4 border-t">
+                    <div class="flex justify-between text-lg font-bold">
+                        <span>Total:</span>
+                        <span>₹ {{ "%.2f"|format(order.total_amount) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Info -->
+            <div>
+                <h2 class="text-xl font-bold mb-4">📋 Order Information</h2>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Order Date:</span>
+                        <span>{{ order.created_at.strftime('%B %d, %Y at %I:%M %p') if order.created_at else 'N/A' }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Payment ID:</span>
+                        <span class="font-mono text-sm">{{ order.payment_id or 'N/A' }}</span>
+                    </div>
+                    {% if order.delivery_address %}
+                    <div>
+                        <span class="text-gray-600 block mb-1">Delivery Address:</span>
+                        <span>{{ order.delivery_address }}</span>
+                    </div>
+                    {% endif %}
+                    {% if order.estimated_delivery_time %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Estimated Delivery:</span>
+                        <span class="font-semibold text-orange-600">{{ order.estimated_delivery_time.strftime('%I:%M %p') if order.estimated_delivery_time else 'N/A' }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Tracking Section -->
+        {% if order.status in ['preparing', 'ready', 'out_for_delivery'] %}
+        <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-6 text-center">🚚 Live Order Tracking</h2>
+
+            <!-- Progress Bar -->
+            <div class="mb-8">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Order Placed</span>
+                    <span>Preparing</span>
+                    <span>Ready</span>
+                    <span>Out for Delivery</span>
+                    <span>Delivered</span>
+                </div>
+                <div class="flex items-center">
+                    {% set status_steps = ['confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered'] %}
+                    {% set current_step = status_steps.index(order.status) if order.status in status_steps else 0 %}
+
+                    {% for i in range(5) %}
+                    <div class="flex-1 flex items-center">
+                        <div class="w-4 h-4 rounded-full {% if i <= current_step %}bg-orange-500{% else %}bg-gray-300{% endif %}"></div>
+                        {% if i < 4 %}
+                        <div class="flex-1 h-1 {% if i < current_step %}bg-orange-500{% else %}bg-gray-300{% endif %}"></div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Delivery Agent Info -->
+            {% if order.delivery_person_name %}
+            <div class="bg-white rounded-lg p-4 mb-4">
+                <h3 class="font-bold text-lg mb-3">👨‍🚀 Your Delivery Partner</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-gray-600">Name:</p>
+                        <p class="font-semibold">{{ order.delivery_person_name }}</p>
+                    </div>
+                    {% if order.delivery_person_contact %}
+                    <div>
+                        <p class="text-gray-600">Contact:</p>
+                        <p class="font-semibold">{{ order.delivery_person_contact }}</p>
+                    </div>
+                    {% endif %}
+                    {% if order.delivery_lat and order.delivery_lng %}
+                    <div class="md:col-span-2">
+                        <p class="text-gray-600 mb-2">Live Location:</p>
+                        <div id="map" class="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <p class="text-gray-500">🗺️ Map loading... ({{ "%.4f"|format(order.delivery_lat) }}, {{ "%.4f"|format(order.delivery_lng) }})</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Dynamic ETA -->
+            <div class="bg-white rounded-lg p-4">
+                <h3 class="font-bold text-lg mb-3">⏰ Estimated Delivery Time</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div>
+                        <p class="text-2xl font-bold text-orange-600">{{ order.preparation_time_minutes or 15 }}</p>
+                        <p class="text-sm text-gray-600">Prep Time (min)</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-blue-600">{{ "%.1f"|format(order.traffic_factor or 1.0) }}x</p>
+                        <p class="text-sm text-gray-600">Traffic Factor</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-green-600">{{ "%.1f"|format(order.weather_factor or 1.0) }}x</p>
+                        <p class="text-sm text-gray-600">Weather Factor</p>
+                    </div>
+                </div>
+                {% if order.estimated_delivery_time %}
+                <div class="mt-4 text-center">
+                    <p class="text-lg font-semibold">Expected Arrival: <span class="text-orange-600">{{ order.estimated_delivery_time.strftime('%I:%M %p') }}</span></p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Feedback Section -->
+        {% if order.status == 'delivered' %}
+        <div class="bg-green-50 border-2 border-green-200 rounded-xl p-6">
+            <h2 class="text-xl font-bold text-green-800 mb-4">📝 Rate Your Experience</h2>
+            {% if order.feedback %}
+            <div class="bg-white rounded-lg p-4">
+                <p class="font-semibold mb-2">Your Feedback:</p>
+                <div class="flex items-center space-x-2 mb-2">
+                    <span>Food Rating:</span>
+                    {% for i in range(5) %}
+                    <span class="text-lg {% if i < order.feedback.rating %}text-yellow-400{% else %}text-gray-300{% endif %}">★</span>
+                    {% endfor %}
+                </div>
+                {% if order.feedback.comment %}
+                <p class="text-gray-700 italic">"{{ order.feedback.comment }}"</p>
+                {% endif %}
+            </div>
+            {% else %}
+            <a href="/feedback/{{ order.id }}" class="inline-block bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition">
+                Leave Feedback
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Simple map placeholder - in real app, integrate with Google Maps or similar
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh every 30 seconds for live tracking
+    {% if order.status in ['preparing', 'ready', 'out_for_delivery'] %}
+    setInterval(function() {
+        location.reload();
+    }, 30000);
+    {% endif %}
+});
+</script>
+{% endblock %}

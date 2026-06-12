@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Portkey{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl shadow-xl p-12 mb-12 text-white">
+        <h1 class="text-5xl font-bold mb-4">Welcome to Portkey! 🏆</h1>
+        <p class="text-xl mb-6">Delicious food from your favorite restaurants, delivered to your door.</p>
+        <div class="flex space-x-4">
+            <a href="#restaurants" class="bg-white text-orange-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                Browse Restaurants
+            </a>
+            <a href="/chatbot-page" class="bg-orange-700 px-6 py-3 rounded-lg font-semibold hover:bg-orange-800 transition">
+                🤖 Need Help? Chat with Us
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">🔍 Filter Restaurants</h2>
+        <form method="GET" action="/" class="flex flex-wrap gap-4 items-end">
+            <!-- Veg/Non-Veg Filter -->
+            <div class="flex-1 min-w-0">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Dietary Preference</label>
+                <select name="diet" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <option value="">All</option>
+                    <option value="veg" {% if request.args.get('diet') == 'veg' %}selected{% endif %}>Vegetarian Only</option>
+                    <option value="nonveg" {% if request.args.get('diet') == 'nonveg' %}selected{% endif %}>Non-Vegetarian Only</option>
+                </select>
+            </div>
+
+            <!-- Sort Options -->
+            <div class="flex-1 min-w-0">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                <select name="sort" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <option value="relevance" {% if request.args.get('sort') == 'relevance' %}selected{% endif %}>Relevance</option>
+                    <option value="popularity" {% if request.args.get('sort') == 'popularity' %}selected{% endif %}>Popularity</option>
+                    <option value="distance_low" {% if request.args.get('sort') == 'distance_low' %}selected{% endif %}>Distance: Near to Far</option>
+                    <option value="distance_high" {% if request.args.get('sort') == 'distance_high' %}selected{% endif %}>Distance: Far to Near</option>
+                    <option value="price_low" {% if request.args.get('sort') == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_high" {% if request.args.get('sort') == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                </select>
+            </div>
+
+            <!-- Apply Filters Button -->
+            <div>
+                <button type="submit" class="bg-orange-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-orange-700 transition">
+                    Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Restaurants Section -->
+    <div id="restaurants">
+        <h2 class="text-3xl font-bold text-gray-800 mb-8">🍽️ Our Restaurants</h2>
+
+        {% if restaurants %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for restaurant in restaurants %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-2">
+                <div class="bg-gradient-to-r from-orange-400 to-orange-500 h-48 flex items-center justify-center">
+                    <span class="text-7xl">
+                        {% if restaurant.cuisine_type == 'Italian' %}🍝
+                        {% elif restaurant.cuisine_type == 'Chinese' %}🥡
+                        {% elif restaurant.cuisine_type == 'Indian' %}🍛
+                        {% elif restaurant.cuisine_type == 'Mexican' %}🌮
+                        {% elif restaurant.cuisine_type == 'American' %}🍔
+                        {% else %}🍴
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">{{ restaurant.name }}</h3>
+                    <p class="text-orange-600 font-semibold mb-3">{{ restaurant.cuisine_type }} Cuisine</p>
+                    <div class="text-gray-600 text-sm space-y-2 mb-4">
+                        <p>📍 {{ restaurant.address }}</p>
+                        <p>📞 {{ restaurant.contact }}</p>
+                        <p>🕒 {{ restaurant.operating_hours }}</p>
+                        <p>📏 {{ "%.1f"|format(restaurant.distance_km) }} km away</p>
+                        <p>⭐ {{ "%.1f"|format(restaurant.popularity_score) }}/10 popularity</p>
+                    </div>
+                    <a href="/restaurant/{{ restaurant.id }}" class="block w-full bg-orange-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-orange-700 transition">
+                        View Menu
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-lg">
+            <p class="text-yellow-700 font-medium">No restaurants available at the moment. Please check back later!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Features Section -->
+    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-white p-8 rounded-xl shadow-lg text-center">
+            <div class="text-5xl mb-4">🚀</div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Fast Delivery</h3>
+            <p class="text-gray-600">Get your food delivered hot and fresh within minutes!</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow-lg text-center">
+            <div class="text-5xl mb-4">💳</div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Secure Payments</h3>
+            <p class="text-gray-600">Pay safely with Razorpay - Cards, UPI, Net Banking & more!</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow-lg text-center">
+            <div class="text-5xl mb-4">🤖</div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">AI Chatbot</h3>
+            <p class="text-gray-600">Get instant help and recommendations from our smart assistant!</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

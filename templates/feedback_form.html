@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Feedback for Order #{{ order.id }} - Portkey{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="bg-white rounded-xl shadow-lg p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Share Your Feedback</h1>
+        <p class="text-gray-600 mb-8">Help us improve by rating your experience with Order #{{ order.id }}</p>
+
+        <!-- Order Summary -->
+        <div class="bg-gray-50 rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Order Summary</h2>
+            <div class="space-y-2">
+                {% for item in order.order_items %}
+                <p>• {{ item.menu_item.name if item.menu_item else 'Unknown Item' }} × {{ item.quantity }}</p>
+                {% endfor %}
+            </div>
+            <div class="mt-4 pt-4 border-t">
+                <p class="font-bold">Total: ₹ {{ "%.2f"|format(order.total_amount) }}</p>
+                <p class="text-sm text-gray-600">Ordered on {{ order.created_at.strftime('%B %d, %Y') if order.created_at else 'N/A' }}</p>
+            </div>
+        </div>
+
+        <form method="POST" class="space-y-8">
+            <!-- Food Quality Rating -->
+            <div>
+                <label class="block text-lg font-semibold text-gray-800 mb-4">⭐ How would you rate your overall experience?</label>
+                <div class="flex space-x-2">
+                    {% for i in range(1, 6) %}
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="radio" name="rating" value="{{ i }}" required class="w-5 h-5 text-orange-600">
+                        <span class="text-2xl">{{ '⭐' * i }}{{ '☆' * (5-i) }}</span>
+                        <span class="text-sm text-gray-600">
+                            {% if i == 1 %}Poor{% elif i == 2 %}Fair{% elif i == 3 %}Good{% elif i == 4 %}Very Good{% else %}Excellent{% endif %}
+                        </span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Comments -->
+            <div>
+                <label class="block text-lg font-semibold text-gray-800 mb-4">💬 Additional Comments (Optional)</label>
+                <textarea name="comment" rows="4" placeholder="Tell us about your experience, suggestions for improvement, or any issues you faced..."
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none resize-vertical"
+                    maxlength="1000"></textarea>
+                <p class="text-sm text-gray-500 mt-1">Maximum 1000 characters</p>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex flex-wrap gap-4 pt-6 border-t">
+                <button type="submit" class="bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-700 transition">
+                    Submit Feedback
+                </button>
+                <a href="/order/{{ order.id }}" class="bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-700 transition">
+                    Cancel
+                </a>
+            </div>
+        </form>
+
+        <!-- Privacy Note -->
+        <div class="mt-8 p-4 bg-blue-50 border-l-4 border-blue-400">
+            <p class="text-sm text-blue-700">
+                <strong>Privacy:</strong> Your feedback helps us improve our service. We may use this information anonymously for quality improvement purposes.
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+input[type="radio"]:checked + span {
+    color: #f97316; /* Orange color for selected stars */
+}
+</style>
+{% endblock %}
