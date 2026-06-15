@@ -51,7 +51,12 @@ This project was developed as part of the Software Engineering Laboratory course
 
 Further documentation, screenshots, diagrams, and setup guides can be added to this folder as the project evolves.
 
-*Copyright © 2025 Princita Zina Miranda*
+## License & Usage Notice
 
-**This project is provided for portfolio and evaluation purposes.**
-**Copying, redistribution, or commercial use is not permitted without permission.**
+Copyright © 2025 Princita Zina Miranda
+
+This project is provided for portfolio and evaluation purposes only. Copying, redistribution, modification, reproduction, or commercial use of any part of this project is not permitted without the express written permission of the author.
+
+Viewing the source code for educational reference is allowed; however, cloning, republishing, submitting as your own work, or using this project in whole or in part for academic, personal, or commercial purposes is strictly prohibited.
+
+All rights reserved.
