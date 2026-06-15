@@ -53,10 +53,6 @@ Further documentation, screenshots, diagrams, and setup guides can be added to t
 
 ## License & Usage Notice
 
-Copyright © 2025 Princita Zina Miranda
+Copyright © 2026 Princita Zina Miranda. All Rights Reserved.
 
-This project is provided for portfolio and evaluation purposes only. Copying, redistribution, modification, reproduction, or commercial use of any part of this project is not permitted without the express written permission of the author.
-
-Viewing the source code for educational reference is allowed; however, cloning, republishing, submitting as your own work, or using this project in whole or in part for academic, personal, or commercial purposes is strictly prohibited.
-
-All rights reserved.
+No permission is granted to use, copy, modify, distribute, sublicense, or create derivative works from this source code without prior written permission from the author.
