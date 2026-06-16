@@ -50,3 +50,9 @@ This project was developed as part of the Software Engineering Laboratory course
 * Advanced chatbot capabilities
 
 Further documentation, screenshots, diagrams, and setup guides can be added to this folder as the project evolves.
+
+## License & Usage Notice
+
+Copyright © 2026 Princita Zina Miranda. All Rights Reserved.
+
+No permission is granted to use, copy, modify, distribute, sublicense, or create derivative works from this source code without prior written permission from the author.
